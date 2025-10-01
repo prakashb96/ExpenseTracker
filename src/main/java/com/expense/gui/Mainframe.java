@@ -25,8 +25,6 @@ public class Mainframe extends JFrame {
     private JPanel main;
     private JButton expenseButton, categoryButton;
 
-    // Components for Expense
-
     private ExpenseDAO expenseDAO;
     private JFrame frame;
     private JButton addButton, editButton, deleteButton, refreshButton, exitButton;
@@ -35,8 +33,6 @@ public class Mainframe extends JFrame {
     private JTextField amountField;
     private JTextArea descriptionField;
     private JTextField categoryIdField;
-
-    // Components for Category
 
     private JFrame categoryFrame;
     private CategoryDAO categoryDAO;
@@ -97,14 +93,12 @@ public class Mainframe extends JFrame {
         });
     }
 
-    // Window for Expense
-
     public void onSelectedExpense() {
 
-        JFrame frame = new JFrame("Expense Tracker");
+        this.frame = new JFrame("Expense Tracker");
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.setSize(1920, 1200);
-        frame.setResizable(false);
+        frame.setSize(800, 600); 
+        frame.setResizable(true);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
 
@@ -119,7 +113,7 @@ public class Mainframe extends JFrame {
         expenseTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         amountField = new JTextField(20);
-        descriptionField = new JTextArea(4, 20);
+        descriptionField = new JTextArea(5, 20);
         descriptionField.setLineWrap(true);
         descriptionField.setWrapStyleWord(true);
         categoryIdField = new JTextField(20);
@@ -133,52 +127,77 @@ public class Mainframe extends JFrame {
 
         frame.setLayout(new BorderLayout());
 
-        JPanel inputPanel = new JPanel(new GridBagLayout());
+        JPanel leftPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.fill= GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        gbc.weightx = 0.5;
+
         gbc.gridx = 0;
         gbc.gridy = 0;
-
-        inputPanel.add(new JLabel("Amount:"), gbc);
+        gbc.fill = GridBagConstraints.NONE;
+        leftPanel.add(new JLabel("Amount:"), gbc);
 
         gbc.gridx = 1;
-        inputPanel.add(amountField, gbc);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        leftPanel.add(amountField, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 1;
-        inputPanel.add(new JLabel("Description:"), gbc);
+        gbc.fill = GridBagConstraints.NONE;
+        leftPanel.add(new JLabel("Description:"), gbc);
 
         gbc.gridx = 1;
-        inputPanel.add(new JScrollPane(descriptionField), gbc);
+        gbc.gridy = 1;
+        gbc.gridheight = 2;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weighty = 0.5;
+        leftPanel.add(new JScrollPane(descriptionField), gbc);
+        gbc.gridheight = 1; 
+        gbc.weighty = 0.0;
 
         gbc.gridx = 0;
-        gbc.gridy = 2;
-        inputPanel.add(new JLabel("Category ID:"), gbc);
+        gbc.gridy = 3;
+        gbc.fill = GridBagConstraints.NONE;
+        leftPanel.add(new JLabel("Category ID:"), gbc);
 
         gbc.gridx = 1;
-        inputPanel.add(categoryIdField, gbc);
-
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        leftPanel.add(categoryIdField, gbc);
         
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.gridwidth = 2;
+        gbc.weighty = 0.5;
+        gbc.fill = GridBagConstraints.BOTH;
+        leftPanel.add(new JPanel(), gbc); // Empty panel to push everything to the top
 
-        JPanel buttoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 20));
-        buttoPanel.add(addButton);
-        buttoPanel.add(editButton);
-        buttoPanel.add(deleteButton);
-        buttoPanel.add(refreshButton);
-        buttoPanel.add(exitButton);
+        JPanel mainControlPanel = new JPanel(new BorderLayout());
 
-        JPanel northpanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        northpanel.add(inputPanel, BorderLayout.CENTER);
-        northpanel.add(buttoPanel, BorderLayout.SOUTH);
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        buttonPanel.add(addButton);
+        buttonPanel.add(editButton);
+        buttonPanel.add(deleteButton);
+        buttonPanel.add(refreshButton);
+        
+        mainControlPanel.add(buttonPanel, BorderLayout.NORTH);
+        mainControlPanel.add(new JScrollPane(expenseTable), BorderLayout.CENTER);
 
-        frame.add(northpanel, BorderLayout.NORTH);
-        frame.add(new JScrollPane(expenseTable), BorderLayout.CENTER);
 
-        JPanel statusPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, mainControlPanel);
+        splitPane.setResizeWeight(0.3); 
+        splitPane.setDividerLocation(300);
+
+        JPanel exitPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        exitPanel.add(exitButton);
+
+        frame.add(splitPane, BorderLayout.CENTER);
+        
+        JPanel statusPanel = new JPanel(new BorderLayout());
         JLabel statusLabel = new JLabel("Status: Ready");
-        statusPanel.add(statusLabel);
+        statusPanel.add(statusLabel, BorderLayout.WEST);
+        statusPanel.add(exitPanel, BorderLayout.EAST);
+        
         frame.add(statusPanel, BorderLayout.SOUTH);
 
         addButton.addActionListener((ActionEvent e) -> addExpense());
@@ -203,8 +222,6 @@ public class Mainframe extends JFrame {
         frame.setVisible(true);
 
     }
-
-    // Window for Category
 
     public void onSelectedCategory() {
         categoryFrame = new JFrame("Category");
@@ -291,11 +308,9 @@ public class Mainframe extends JFrame {
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(categoryFrame, "Failed to load categories: " + ex.getMessage(),
-                    "Database Error", JOptionPane.ERROR_MESSAGE);
+                        "Database Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-
-    // Methods for Expense
 
     private void addExpense() {
         try {
@@ -305,7 +320,7 @@ public class Mainframe extends JFrame {
 
             if (description.isEmpty()) {
                 JOptionPane.showMessageDialog(frame, "Description cannot be empty.", "Input Error",
-                        JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
@@ -320,10 +335,10 @@ public class Mainframe extends JFrame {
             }
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(frame, "Please enter valid numbers for Amount and Category ID.",
-                    "Input Error", JOptionPane.ERROR_MESSAGE);
+                        "Input Error", JOptionPane.ERROR_MESSAGE);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(frame, "Error adding expense: " + ex.getMessage(), "Error",
-                    JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.ERROR_MESSAGE);
         }
 
     }
@@ -333,7 +348,7 @@ public class Mainframe extends JFrame {
         int selectedRow = expenseTable.getSelectedRow();
         if (selectedRow == -1) {
             JOptionPane.showMessageDialog(frame, "Please select an expense to edit.", "Error",
-                    JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -345,7 +360,7 @@ public class Mainframe extends JFrame {
 
             if (description.isEmpty()) {
                 JOptionPane.showMessageDialog(frame, "Description cannot be empty.", "Input Error",
-                        JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
@@ -361,10 +376,10 @@ public class Mainframe extends JFrame {
             }
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(frame, "Please enter valid numbers for Amount and Category ID.",
-                    "Input Error", JOptionPane.ERROR_MESSAGE);
+                        "Input Error", JOptionPane.ERROR_MESSAGE);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(frame, "Error updating expense: " + ex.getMessage(), "Error",
-                    JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -372,13 +387,13 @@ public class Mainframe extends JFrame {
         int selectedRow = expenseTable.getSelectedRow();
         if (selectedRow == -1) {
             JOptionPane.showMessageDialog(frame, "Please select an expense to delete.", "Error",
-                    JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         int eid = (int) tableModel.getValueAt(selectedRow, 0);
         int confirmation = JOptionPane.showConfirmDialog(frame, "Are you sure you want to delete this expense?",
-                "Confirm Deletion", JOptionPane.YES_NO_OPTION);
+                    "Confirm Deletion", JOptionPane.YES_NO_OPTION);
 
         if (confirmation == JOptionPane.YES_OPTION) {
             try {
@@ -389,11 +404,11 @@ public class Mainframe extends JFrame {
                     clearFields();
                 } else {
                     JOptionPane.showMessageDialog(frame, "Failed to delete expense.", "Error",
-                            JOptionPane.ERROR_MESSAGE);
+                                JOptionPane.ERROR_MESSAGE);
                 }
             } catch (SQLException ex) {
                 JOptionPane.showMessageDialog(frame, "Error deleting expense: " + ex.getMessage(), "Database Error",
-                        JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.ERROR_MESSAGE);
             }
         }
 
@@ -415,7 +430,7 @@ public class Mainframe extends JFrame {
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Failed to load expenses: " + ex.getMessage(), "Database Error",
-                    JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -436,18 +451,16 @@ public class Mainframe extends JFrame {
         expenseTable.clearSelection();
     }
 
-    /// Methods for Category
     private void addCategory() {
         String name = categoryNameField.getText().trim();
 
         if (name.isEmpty()) {
             JOptionPane.showMessageDialog(categoryFrame, "Category name cannot be empty.", "Input Error",
-                    JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         try {
-            // ID 0 indicates a new category to be inserted
             Category newCategory = new Category(0, name);
             boolean success = categoryDAO.addCategory(newCategory);
 
@@ -457,12 +470,12 @@ public class Mainframe extends JFrame {
                 clearCategoryFields();
             } else {
                 JOptionPane.showMessageDialog(categoryFrame,
-                        "Failed to add category. Category name might already exist.", "Error",
-                        JOptionPane.ERROR_MESSAGE);
+                            "Failed to add category. Category name might already exist.", "Error",
+                            JOptionPane.ERROR_MESSAGE);
             }
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(categoryFrame, "Error adding category: " + ex.getMessage(), "Database Error",
-                    JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -472,12 +485,12 @@ public class Mainframe extends JFrame {
 
         if (selectedRow == -1) {
             JOptionPane.showMessageDialog(categoryFrame, "Please select a category to edit.", "Error",
-                    JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.ERROR_MESSAGE);
             return;
         }
         if (newName.isEmpty()) {
             JOptionPane.showMessageDialog(categoryFrame, "Category name cannot be empty.", "Input Error",
-                    JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -493,12 +506,12 @@ public class Mainframe extends JFrame {
                 clearCategoryFields();
             } else {
                 JOptionPane.showMessageDialog(categoryFrame,
-                        "Failed to update category. Category name might already exist.", "Error",
-                        JOptionPane.ERROR_MESSAGE);
+                            "Failed to update category. Category name might already exist.", "Error",
+                            JOptionPane.ERROR_MESSAGE);
             }
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(categoryFrame, "Error updating category: " + ex.getMessage(),
-                    "Database Error", JOptionPane.ERROR_MESSAGE);
+                        "Database Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -507,7 +520,7 @@ public class Mainframe extends JFrame {
 
         if (selectedRow == -1) {
             JOptionPane.showMessageDialog(categoryFrame, "Please select a category to delete.", "Error",
-                    JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -515,12 +528,12 @@ public class Mainframe extends JFrame {
         String categoryName = (String) categoryTableModel.getValueAt(selectedRow, 1);
 
         int confirmation = JOptionPane.showConfirmDialog(
-                categoryFrame,
-                "Are you sure you want to delete Category: " + categoryName
-                        + "?\n(This action will fail if the category is referenced by any expense.)",
-                "Confirm Deletion",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.WARNING_MESSAGE);
+                    categoryFrame,
+                    "Are you sure you want to delete Category: " + categoryName
+                            + "?\n(This action will fail if the category is referenced by any expense.)",
+                    "Confirm Deletion",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE);
 
         if (confirmation == JOptionPane.YES_OPTION) {
             try {
@@ -531,12 +544,12 @@ public class Mainframe extends JFrame {
                     clearCategoryFields();
                 } else {
                     JOptionPane.showMessageDialog(categoryFrame,
-                            "Failed to delete category. It might be linked to existing expenses.", "Error",
-                            JOptionPane.ERROR_MESSAGE);
+                                "Failed to delete category. It might be linked to existing expenses.", "Error",
+                                JOptionPane.ERROR_MESSAGE);
                 }
             } catch (SQLException ex) {
                 JOptionPane.showMessageDialog(categoryFrame, "Error deleting category: " + ex.getMessage(),
-                        "Database Error", JOptionPane.ERROR_MESSAGE);
+                            "Database Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
